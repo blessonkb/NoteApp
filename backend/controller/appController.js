@@ -23,7 +23,7 @@ const getNotes = async (req, res) => {
 
 const deleteCategory = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params.id;
     const userId = req.user.userId;
 
     const deletedCategory = await Category.findOneAndDelete({
@@ -45,7 +45,7 @@ const deleteCategory = async (req, res) => {
 
 const deleteNote = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params.id;
     const userId = req.user.userId;
 
     const deletedNote = await Note.findOneAndDelete({ _id: id, userId });
@@ -62,6 +62,79 @@ const deleteNote = async (req, res) => {
   }
 };
 
+  const addCategory = async (req, res) => {
+    try {
+      const { categoryName , description} = req.body;
+      const userId = req.user.userId;
 
+      const newCategory = new Category({ categoryName, description, userId });
+      await newCategory.save();
 
-module.exports = { getcategories, getNotes, deleteCategory, deleteNote };
+      res.json({ message: "Category added successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error", error });
+    }
+  };
+
+  const addNote = async (req, res) => {
+    try {
+      const { title, content } = req.body;
+      const userId = req.user.userId;
+
+      const newNote = new Note({ title, content, userId });
+      await newNote.save();
+
+      res.json({ message: "Note added successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error", error });
+    }
+  };
+
+  const updateCategory = async (req, res) => {
+    try {
+      const { id } = req.params.id;
+      const { categoryName, description } = req.body;
+      const userId = req.user.userId;
+
+      const updatedCategory = await Category.findOneAndUpdate(
+        { _id: id, userId },
+        { categoryName, description }
+      );
+
+      if (!updatedCategory) {
+        return res
+          .status(404)
+          .json({ message: "Category not found or not authorized" });
+      }
+
+      res.json({ message: "Category updated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error", error });
+    }
+  };
+
+  const updateNote = async (req, res) => {
+    try {
+      const { id } = req.params.id;
+      const { title, content } = req.body;
+      const userId = req.user.userId;
+
+      const updatedNote = await Note.findOneAndUpdate(
+        { _id: id, userId },
+        { title, content }
+      );
+
+      if (!updatedNote) {
+        return res
+          .status(404)
+          .json({ message: "Note not found or not authorized" });
+      }
+
+      res.json({ message: "Note updated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error", error });
+    }
+  };
+
+module.exports = { getcategories, getNotes,
+     deleteCategory, deleteNote, addCategory, addNote, updateCategory, updateNote };
